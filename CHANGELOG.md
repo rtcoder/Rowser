@@ -2,6 +2,10 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.7.2
+
+- Added packaged-extension e2e coverage proving Table -> Raw -> Table does not refetch the source.
+
 ## v0.7.1
 
 - Fixed Chrome DNR attachment exclusion by using `excludedResponseHeaders`.

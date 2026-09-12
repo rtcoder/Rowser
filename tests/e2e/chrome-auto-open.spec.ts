@@ -27,6 +27,32 @@ test('redirects a top-level CSV navigation to the packaged Chrome viewer', async
   }
 });
 
+test('switches Table to Raw and back without refetching the source', async () => {
+  const fixtureServer = await startFixtureServer();
+  const browser = await launchExtension();
+
+  try {
+    await getDynamicRules(browser.context);
+    const page = await browser.context.newPage();
+    await page.goto(fixtureServer.url('/file.csv'));
+
+    await expect(page.getByRole('region', { name: 'CSV table' })).toBeVisible();
+    expect(fixtureServer.requestCount('/file.csv')).toBe(2);
+
+    await page.getByLabel('Viewer mode').getByRole('button', { name: 'Raw' }).click();
+    await expect(page.locator('pre.raw')).toContainText('name,score');
+    expect(fixtureServer.requestCount('/file.csv')).toBe(2);
+
+    await page.getByLabel('Viewer mode').getByRole('button', { name: 'Table' }).click();
+    await expect(page.getByRole('region', { name: 'CSV table' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'Ada' })).toBeVisible();
+    expect(fixtureServer.requestCount('/file.csv')).toBe(2);
+  } finally {
+    await browser.close();
+    await fixtureServer.close();
+  }
+});
+
 test('redirects a top-level TSV navigation to the packaged Chrome viewer', async () => {
   const fixtureServer = await startFixtureServer();
   const browser = await launchExtension();
