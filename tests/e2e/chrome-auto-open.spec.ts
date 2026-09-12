@@ -72,6 +72,26 @@ test('opens a manual URL in the packaged Chrome viewer', async () => {
   }
 });
 
+test('recovers from a manual URL load error by opening another file', async () => {
+  const fixtureServer = await startFixtureServer();
+  const browser = await launchExtension();
+
+  try {
+    const page = await openManualUrl(browser.context, fixtureServer.url('/missing.csv'));
+
+    await expect(page.getByRole('heading', { name: 'Network request failed' })).toBeVisible();
+    await expect(page.getByText('HTTP 404: Not Found')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Open another file' }).click();
+
+    await expect(page.getByText('Open a CSV or TSV URL from the popup, or drop a file here.')).toBeVisible();
+    await expect(page.locator('input[type="file"]')).toBeVisible();
+  } finally {
+    await browser.close();
+    await fixtureServer.close();
+  }
+});
+
 test('imports quoted CSV values without splitting embedded commas or quotes', async () => {
   const fixtureServer = await startFixtureServer();
   const browser = await launchExtension();

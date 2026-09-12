@@ -66,6 +66,17 @@ export function App() {
     setState({ status: 'deciding-large-file', source, decision });
   }
 
+  function resetViewer() {
+    void tableEngineRef.current?.dispose();
+    tableEngineRef.current = null;
+    setMode('table');
+    setWrapRaw(false);
+    setState({ status: 'idle' });
+    setTableState({ status: 'idle' });
+    setPageRequest(DEFAULT_PAGE_REQUEST);
+    setQueryRequest(DEFAULT_PAGE_REQUEST);
+  }
+
   useEffect(() => {
     return () => {
       void tableEngineRef.current?.dispose();
@@ -265,7 +276,13 @@ export function App() {
             onCancel={() => setState({ status: 'idle' })}
           />
         ) : null}
-        {state.status === 'error' ? <ErrorState title={state.title} detail={state.detail} /> : null}
+        {state.status === 'error' ? (
+          <ErrorState
+            title={state.title}
+            detail={state.detail}
+            onOpenAnotherFile={resetViewer}
+          />
+        ) : null}
         {state.status === 'ready' && mode === 'table' ? (
           <TablePanel
             tableState={tableState}

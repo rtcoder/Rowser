@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.8.0
+
+- Added an `Open another file` recovery action for viewer load errors.
+- Added unit and packaged-extension e2e coverage for error recovery.
+
 ## v0.7.4
 
 - Added packaged-extension e2e coverage for quoted CSV values, multiline cells, and mixed-type columns.
