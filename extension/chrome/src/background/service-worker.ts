@@ -1,4 +1,4 @@
-import { detectDocument } from './detect-document';
+import { detectDocument } from '../../../shared/src/background/detect-document';
 import { saveNavigationHandoff } from './handoff-store';
 
 chrome.webRequest.onHeadersReceived.addListener(

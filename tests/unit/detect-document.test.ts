@@ -1,5 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { detectDocument, type ResponseMetadata } from '../../src/background/detect-document';
+import {
+  detectDocument,
+  type ResponseMetadata
+} from '../../extension/shared/src/background/detect-document';
 
 function response(overrides: Partial<ResponseMetadata>): ResponseMetadata {
   return {

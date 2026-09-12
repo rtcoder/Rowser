@@ -4,8 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build",
+    "dev": "vite --config extension/chrome/vite.config.ts --host 127.0.0.1",
+    "dev:chrome": "vite --config extension/chrome/vite.config.ts --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build --config extension/chrome/vite.config.ts",
+    "build:chrome": "tsc --noEmit && vite build --config extension/chrome/vite.config.ts",
     "test": "vitest run",
     "test:e2e": "playwright test"
   },

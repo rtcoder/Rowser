@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import { consumeNavigationHandoff } from '../background/handoff-store';
 import { PRODUCT_NAME, TAGLINE } from '../shared/constants';
 import { formatBytes } from '../shared/format-bytes';
+import { consumeNavigationHandoff } from './handoff/navigation-handoff';
 import { loadLocalSource } from './source/local-source';
 import { loadRemoteSource } from './source/remote-source';
 import type { RowserSource } from './source/source-types';

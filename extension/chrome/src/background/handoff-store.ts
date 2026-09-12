@@ -1,4 +1,4 @@
-import type { DetectedFormat } from './detect-document';
+import type { DetectedFormat } from '../../../shared/src/background/detect-document';
 
 export interface NavigationHandoff {
   sourceUrl: string;

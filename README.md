@@ -14,7 +14,15 @@ pnpm test
 pnpm build
 ```
 
-Load `dist/` as an unpacked extension after building.
+Load `dist/chrome/` as an unpacked extension after building.
+
+## Repository Layout
+
+- `docs/` is reserved for documentation and GitHub Pages.
+- `extension/chrome/` contains the Chromium Manifest V3 target.
+- `extension/firefox/` is reserved for future Firefox support.
+- `extension/shared/` contains browser-agnostic UI and core logic where practical.
+- `codex.md` stays in the repository root as the implementation plan.
 
 ## Permissions
 

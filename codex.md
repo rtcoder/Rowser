@@ -503,7 +503,8 @@ Drag-and-drop is implemented only on the full viewer page.
 
 # 9. Project structure
 
-Use this structure unless a Vite-specific build requirement forces a small adjustment:
+Use this structure. Rowser is Chromium-first, but the repository must keep a
+clear place for a future Firefox target from the beginning:
 
 ```text
 rowser/
@@ -511,55 +512,69 @@ rowser/
 ├── README.md
 ├── package.json
 ├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
 ├── tsconfig.json
-├── vite.config.ts
-├── public/
-│   ├── manifest.json
-│   └── icons/
-│       ├── icon-16.png
-│       ├── icon-32.png
-│       ├── icon-48.png
-│       └── icon-128.png
-├── src/
-│   ├── background/
-│   │   ├── service-worker.ts
-│   │   ├── detect-document.ts
-│   │   └── handoff-store.ts
-│   ├── popup/
+├── docs/
+│   └── README.md
+├── extension/
+│   ├── chrome/
 │   │   ├── popup.html
-│   │   ├── main.tsx
-│   │   └── Popup.tsx
-│   ├── viewer/
 │   │   ├── viewer.html
-│   │   ├── main.tsx
-│   │   ├── App.tsx
-│   │   ├── viewer.css
-│   │   ├── components/
-│   │   │   ├── Toolbar.tsx
-│   │   │   ├── SourceSummary.tsx
-│   │   │   ├── DataTable.tsx
-│   │   │   ├── Pagination.tsx
-│   │   │   ├── RawView.tsx
-│   │   │   ├── LargeFileDialog.tsx
-│   │   │   ├── DropZone.tsx
-│   │   │   └── ErrorState.tsx
-│   │   ├── source/
-│   │   │   ├── source-types.ts
-│   │   │   ├── remote-source.ts
-│   │   │   ├── local-source.ts
-│   │   │   └── source-name.ts
-│   │   ├── engine/
-│   │   │   ├── duckdb-engine.ts
-│   │   │   ├── duckdb-loader.ts
-│   │   │   ├── query-builder.ts
-│   │   │   └── engine-types.ts
-│   │   ├── raw/
-│   │   │   └── raw-reader.ts
-│   │   └── state/
-│   │       └── viewer-state.ts
+│   │   ├── vite.config.ts
+│   │   ├── public/
+│   │   │   ├── manifest.json
+│   │   │   └── icons/
+│   │   │       ├── icon-16.png
+│   │   │       ├── icon-32.png
+│   │   │       ├── icon-48.png
+│   │   │       └── icon-128.png
+│   │   └── src/
+│   │       ├── background/
+│   │       │   ├── service-worker.ts
+│   │       │   └── handoff-store.ts
+│   │       ├── popup/
+│   │       │   └── main.tsx
+│   │       └── viewer/
+│   │           └── main.tsx
+│   ├── firefox/
+│   │   └── README.md
 │   └── shared/
-│       ├── constants.ts
-│       └── format-bytes.ts
+│       └── src/
+│           ├── background/
+│           │   └── detect-document.ts
+│           ├── popup/
+│           │   ├── main.tsx
+│           │   └── Popup.tsx
+│           ├── viewer/
+│           │   ├── main.tsx
+│           │   ├── App.tsx
+│           │   ├── viewer.css
+│           │   ├── components/
+│           │   │   ├── Toolbar.tsx
+│           │   │   ├── SourceSummary.tsx
+│           │   │   ├── DataTable.tsx
+│           │   │   ├── Pagination.tsx
+│           │   │   ├── RawView.tsx
+│           │   │   ├── LargeFileDialog.tsx
+│           │   │   ├── DropZone.tsx
+│           │   │   └── ErrorState.tsx
+│           │   ├── source/
+│           │   │   ├── source-types.ts
+│           │   │   ├── remote-source.ts
+│           │   │   ├── local-source.ts
+│           │   │   └── source-name.ts
+│           │   ├── engine/
+│           │   │   ├── duckdb-engine.ts
+│           │   │   ├── duckdb-loader.ts
+│           │   │   ├── query-builder.ts
+│           │   │   └── engine-types.ts
+│           │   ├── raw/
+│           │   │   └── raw-reader.ts
+│           │   └── state/
+│           │       └── viewer-state.ts
+│           └── shared/
+│               ├── constants.ts
+│               └── format-bytes.ts
 ├── tests/
 │   ├── unit/
 │   │   ├── detect-document.test.ts
@@ -581,8 +596,10 @@ rowser/
 │       ├── multiline.csv
 │       ├── mixed-types.csv
 │       └── empty.csv
-└── scripts/
+├── scripts/
     └── package-extension.mjs
+└── dist/
+    └── chrome/
 ```
 
 ---
@@ -598,7 +615,7 @@ rowser/
 - [ ] Add Manifest V3 with local CSP compatible with DuckDB-WASM.
 - [ ] Add extension icons and basic Rowser branding.
 - [ ] Add `pnpm dev`, `pnpm build`, `pnpm test`, and `pnpm test:e2e`.
-- [ ] Verify `dist/` loads as an unpacked Chromium extension.
+- [ ] Verify `dist/chrome/` loads as an unpacked Chromium extension.
 - [ ] Commit as `chore: bootstrap rowser extension`.
 
 Acceptance:
