@@ -53,6 +53,25 @@ test('switches Table to Raw and back without refetching the source', async () =>
   }
 });
 
+test('opens a manual URL in the packaged Chrome viewer', async () => {
+  const fixtureServer = await startFixtureServer();
+  const browser = await launchExtension();
+
+  try {
+    const viewerUrl = await extensionUrl(browser.context, 'viewer.html');
+    const page = await browser.context.newPage();
+    await page.goto(`${viewerUrl}?url=${encodeURIComponent(fixtureServer.url('/manual.csv'))}`);
+
+    await expect(page.getByRole('region', { name: 'CSV table' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'Manual' })).toBeVisible();
+    await expect(page.getByText('manual.csv')).toBeVisible();
+    expect(fixtureServer.requestCount('/manual.csv')).toBe(1);
+  } finally {
+    await browser.close();
+    await fixtureServer.close();
+  }
+});
+
 test('redirects a top-level TSV navigation to the packaged Chrome viewer', async () => {
   const fixtureServer = await startFixtureServer();
   const browser = await launchExtension();
@@ -155,6 +174,15 @@ async function startFixtureServer(): Promise<FixtureServer> {
       return;
     }
 
+    if (pathname === '/manual.csv') {
+      response.writeHead(200, {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'text/csv'
+      });
+      response.end('name,score\nManual,42\n');
+      return;
+    }
+
     if (pathname === '/attachment.csv') {
       response.writeHead(200, {
         'Content-Disposition': 'attachment; filename="attachment.csv"',
@@ -238,6 +266,13 @@ async function getDynamicRules(
   }
 
   return serviceWorker.evaluate(() => chrome.declarativeNetRequest.getDynamicRules());
+}
+
+async function extensionUrl(context: BrowserContext, pathInExtension: string): Promise<string> {
+  const serviceWorker =
+    context.serviceWorkers()[0] ??
+    (await context.waitForEvent('serviceworker', { timeout: 5_000 }));
+  return serviceWorker.evaluate((pathName) => chrome.runtime.getURL(pathName), pathInExtension);
 }
 
 function close(server: Server): Promise<void> {

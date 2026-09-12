@@ -2,6 +2,10 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.7.3
+
+- Added packaged-extension e2e coverage for manual URL opening.
+
 ## v0.7.2
 
 - Added packaged-extension e2e coverage proving Table -> Raw -> Table does not refetch the source.
