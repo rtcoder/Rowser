@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.7.1
+
+- Fixed Chrome DNR attachment exclusion by using `excludedResponseHeaders`.
+- Expanded packaged-extension e2e coverage to TSV, MIME-only CSV, and attachment CSV navigations.
+
 ## v0.7.0
 
 - Added Chromium extension e2e coverage for automatic top-level CSV navigation.

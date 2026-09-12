@@ -26,10 +26,10 @@ describe('buildDocumentRedirectRules', () => {
 
     expect(
       rules.every((rule) =>
-        rule.condition.responseHeaders?.some(
+        rule.condition.excludedResponseHeaders?.some(
           (header) =>
             header.header === 'content-disposition' &&
-            header.excludedValues?.includes('*attachment*')
+            header.values?.includes('*attachment*')
         )
       )
     ).toBe(true);

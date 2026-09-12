@@ -2,9 +2,9 @@ const RULE_ID_START = 10_000;
 
 type DnrRule = chrome.declarativeNetRequest.Rule;
 
-const NOT_ATTACHMENT: chrome.declarativeNetRequest.HeaderInfo = {
+const ATTACHMENT_HEADER: chrome.declarativeNetRequest.HeaderInfo = {
   header: 'content-disposition',
-  excludedValues: ['*attachment*']
+  values: ['*attachment*']
 };
 
 export function buildDocumentRedirectRules(viewerUrl: string): DnrRule[] {
@@ -21,7 +21,7 @@ export function buildDocumentRedirectRules(viewerUrl: string): DnrRule[] {
         regexFilter: '^https?://.*\\.csv([?#].*)?$',
         isUrlFilterCaseSensitive: false,
         resourceTypes: ['main_frame'],
-        responseHeaders: [NOT_ATTACHMENT]
+        excludedResponseHeaders: [ATTACHMENT_HEADER]
       }
     },
     {
@@ -32,7 +32,7 @@ export function buildDocumentRedirectRules(viewerUrl: string): DnrRule[] {
         regexFilter: '^https?://.*\\.tsv([?#].*)?$',
         isUrlFilterCaseSensitive: false,
         resourceTypes: ['main_frame'],
-        responseHeaders: [NOT_ATTACHMENT]
+        excludedResponseHeaders: [ATTACHMENT_HEADER]
       }
     },
     {
@@ -43,8 +43,8 @@ export function buildDocumentRedirectRules(viewerUrl: string): DnrRule[] {
         regexFilter: '^https?://.*',
         isUrlFilterCaseSensitive: false,
         resourceTypes: ['main_frame'],
+        excludedResponseHeaders: [ATTACHMENT_HEADER],
         responseHeaders: [
-          NOT_ATTACHMENT,
           { header: 'content-type', values: ['text/csv*', 'application/csv*'] }
         ]
       }
@@ -57,8 +57,8 @@ export function buildDocumentRedirectRules(viewerUrl: string): DnrRule[] {
         regexFilter: '^https?://.*',
         isUrlFilterCaseSensitive: false,
         resourceTypes: ['main_frame'],
+        excludedResponseHeaders: [ATTACHMENT_HEADER],
         responseHeaders: [
-          NOT_ATTACHMENT,
           { header: 'content-type', values: ['text/tab-separated-values*', 'text/tsv*'] }
         ]
       }

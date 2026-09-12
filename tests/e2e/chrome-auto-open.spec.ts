@@ -1,4 +1,5 @@
 import { chromium, expect, test } from '@playwright/test';
+import type { BrowserContext } from '@playwright/test';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { createServer, type Server } from 'node:http';
 import { tmpdir } from 'node:os';
@@ -6,39 +7,13 @@ import path from 'node:path';
 
 test('redirects a top-level CSV navigation to the packaged Chrome viewer', async () => {
   const fixtureServer = await startFixtureServer();
-  const userDataDir = await mkdtemp(path.join(tmpdir(), 'rowser-chrome-'));
-  const extensionPath = path.resolve('dist/chrome');
-
-  const context = await chromium.launchPersistentContext(userDataDir, {
-    channel: 'chromium',
-    headless: false,
-    ignoreDefaultArgs: ['--disable-extensions'],
-    args: [
-      `--disable-extensions-except=${extensionPath}`,
-      `--load-extension=${extensionPath}`
-    ]
-  });
+  const browser = await launchExtension();
 
   try {
-    const serviceWorker =
-      context.serviceWorkers()[0] ??
-      (await context.waitForEvent('serviceworker', { timeout: 5_000 }).catch(() => null));
-    if (!serviceWorker) {
-      throw new Error(
-        `Extension service worker did not start. workers=${context
-          .serviceWorkers()
-          .map((worker) => worker.url())
-          .join(',')} pages=${context
-          .pages()
-          .map((openPage) => openPage.url())
-          .join(',')}`
-      );
-    }
-
-    const rules = await serviceWorker.evaluate(() => chrome.declarativeNetRequest.getDynamicRules());
+    const rules = await getDynamicRules(browser.context);
     expect(rules).toHaveLength(4);
 
-    const page = await context.newPage();
+    const page = await browser.context.newPage();
     await page.goto(fixtureServer.url('/file.csv'));
 
     await expect(page).toHaveURL(/chrome-extension:\/\/[^/]+\/viewer\.html#/);
@@ -47,8 +22,69 @@ test('redirects a top-level CSV navigation to the packaged Chrome viewer', async
     await expect(page.getByRole('cell', { name: 'Linus' })).toBeVisible();
     expect(fixtureServer.requestCount('/file.csv')).toBeGreaterThanOrEqual(2);
   } finally {
-    await context.close();
-    await rm(userDataDir, { recursive: true, force: true });
+    await browser.close();
+    await fixtureServer.close();
+  }
+});
+
+test('redirects a top-level TSV navigation to the packaged Chrome viewer', async () => {
+  const fixtureServer = await startFixtureServer();
+  const browser = await launchExtension();
+
+  try {
+    await getDynamicRules(browser.context);
+    const page = await browser.context.newPage();
+    await page.goto(fixtureServer.url('/file.tsv'));
+
+    await expect(page).toHaveURL(/chrome-extension:\/\/[^/]+\/viewer\.html#/);
+    await expect(page.getByRole('region', { name: 'CSV table' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'Ada' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'Linus' })).toBeVisible();
+    expect(fixtureServer.requestCount('/file.tsv')).toBeGreaterThanOrEqual(2);
+  } finally {
+    await browser.close();
+    await fixtureServer.close();
+  }
+});
+
+test('redirects a MIME-only CSV navigation to the packaged Chrome viewer', async () => {
+  const fixtureServer = await startFixtureServer();
+  const browser = await launchExtension();
+
+  try {
+    await getDynamicRules(browser.context);
+    const page = await browser.context.newPage();
+    await page.goto(fixtureServer.url('/mime-only'));
+
+    await expect(page).toHaveURL(/chrome-extension:\/\/[^/]+\/viewer\.html#/);
+    await expect(page.getByRole('region', { name: 'CSV table' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'Grace' })).toBeVisible();
+    expect(fixtureServer.requestCount('/mime-only')).toBeGreaterThanOrEqual(2);
+  } finally {
+    await browser.close();
+    await fixtureServer.close();
+  }
+});
+
+test('does not redirect attachment CSV navigations', async () => {
+  const fixtureServer = await startFixtureServer();
+  const browser = await launchExtension();
+
+  try {
+    await getDynamicRules(browser.context);
+    const page = await browser.context.newPage();
+    const targetUrl = fixtureServer.url('/attachment.csv');
+    await page.goto(fixtureServer.url('/attachment.csv')).catch((error: unknown) => {
+      if (!(error instanceof Error) || !error.message.includes('Download is starting')) {
+        throw error;
+      }
+    });
+
+    await expect(page).not.toHaveURL(/chrome-extension:\/\/[^/]+\/viewer\.html#/);
+    expect(page.url() === 'about:blank' || page.url() === targetUrl).toBe(true);
+    expect(fixtureServer.requestCount('/attachment.csv')).toBe(1);
+  } finally {
+    await browser.close();
     await fixtureServer.close();
   }
 });
@@ -72,6 +108,33 @@ async function startFixtureServer(): Promise<FixtureServer> {
         'Content-Type': 'text/csv'
       });
       response.end('name,score\nAda,10\nLinus,7\n');
+      return;
+    }
+
+    if (pathname === '/file.tsv') {
+      response.writeHead(200, {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'text/tab-separated-values'
+      });
+      response.end('name\tscore\nAda\t10\nLinus\t7\n');
+      return;
+    }
+
+    if (pathname === '/mime-only') {
+      response.writeHead(200, {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'text/csv'
+      });
+      response.end('name,score\nGrace,9\n');
+      return;
+    }
+
+    if (pathname === '/attachment.csv') {
+      response.writeHead(200, {
+        'Content-Disposition': 'attachment; filename="attachment.csv"',
+        'Content-Type': 'text/csv'
+      });
+      response.end('name,score\nDownload,1\n');
       return;
     }
 
@@ -100,6 +163,55 @@ function listen(server: Server): Promise<void> {
       resolve();
     });
   });
+}
+
+interface LaunchedExtension {
+  context: BrowserContext;
+  close: () => Promise<void>;
+}
+
+async function launchExtension(): Promise<LaunchedExtension> {
+  const userDataDir = await mkdtemp(path.join(tmpdir(), 'rowser-chrome-'));
+  const extensionPath = path.resolve('dist/chrome');
+
+  const context = await chromium.launchPersistentContext(userDataDir, {
+    channel: 'chromium',
+    headless: false,
+    ignoreDefaultArgs: ['--disable-extensions'],
+    args: [
+      `--disable-extensions-except=${extensionPath}`,
+      `--load-extension=${extensionPath}`
+    ]
+  });
+
+  return {
+    context,
+    close: async () => {
+      await context.close();
+      await rm(userDataDir, { recursive: true, force: true });
+    }
+  };
+}
+
+async function getDynamicRules(
+  context: BrowserContext
+): Promise<chrome.declarativeNetRequest.Rule[]> {
+  const serviceWorker =
+    context.serviceWorkers()[0] ??
+    (await context.waitForEvent('serviceworker', { timeout: 5_000 }).catch(() => null));
+  if (!serviceWorker) {
+    throw new Error(
+      `Extension service worker did not start. workers=${context
+        .serviceWorkers()
+        .map((worker) => worker.url())
+        .join(',')} pages=${context
+        .pages()
+        .map((openPage) => openPage.url())
+        .join(',')}`
+    );
+  }
+
+  return serviceWorker.evaluate(() => chrome.declarativeNetRequest.getDynamicRules());
 }
 
 function close(server: Server): Promise<void> {
