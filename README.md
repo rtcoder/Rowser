@@ -11,6 +11,7 @@ available.
 ```bash
 pnpm install
 pnpm test
+pnpm test:e2e
 pnpm build
 ```
 
@@ -44,3 +45,14 @@ uploaded to Rowser or any third-party service.
 
 Automatic opening refetches eligible GET URLs in the extension viewer. Single-use
 URLs that cannot be fetched twice may not work in v1.
+
+## File Size Guidance
+
+Rowser targets normal usage up to roughly 512 MB. Files above 200 MB show a
+memory warning before table import, and files above 512 MB require an explicit
+decision before Rowser attempts table mode. Raw mode remains available for large
+files and reads sources in chunks instead of rendering one DOM node per row.
+
+## Chrome Web Store
+
+Draft listing copy lives in `docs/chrome-web-store.md`.

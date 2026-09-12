@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.5.1
+
+- Added Chrome Web Store draft listing copy with privacy and permissions notes.
+- Documented Rowser's file-size guidance and e2e test command in the README.
+
 ## v0.5.0
 
 - Added Playwright configuration for browser-level viewer checks.
