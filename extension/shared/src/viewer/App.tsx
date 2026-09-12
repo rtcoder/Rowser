@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { PRODUCT_NAME, TAGLINE } from '../shared/constants';
 import { formatBytes } from '../shared/format-bytes';
+import { DataTable } from './components/DataTable';
 import { DropZone } from './components/DropZone';
 import { ErrorState } from './components/ErrorState';
 import { LargeFileDialog } from './components/LargeFileDialog';
+import { Pagination } from './components/Pagination';
 import { RawView } from './components/RawView';
+import { createDuckDbTableEngine } from './engine/duckdb-engine';
+import type { PageRequest, RowserTableEngine, TableMetadata, TablePage } from './engine/engine-types';
 import { consumeNavigationHandoff } from './handoff/navigation-handoff';
 import { loadLocalSource } from './source/local-source';
 import { loadRemoteSource } from './source/remote-source';
@@ -23,10 +27,28 @@ type LoadState =
   | { status: 'ready'; source: RowserSource }
   | { status: 'error'; title: string; detail: string };
 
+type TableState =
+  | { status: 'idle' }
+  | { status: 'importing' }
+  | { status: 'querying'; metadata: TableMetadata | null }
+  | { status: 'ready'; metadata: TableMetadata; page: TablePage }
+  | { status: 'error'; title: string; detail: string; metadata: TableMetadata | null };
+
+const DEFAULT_PAGE_REQUEST: PageRequest = {
+  page: 0,
+  pageSize: 100,
+  search: '',
+  sort: null
+};
+
 export function App() {
   const [mode, setMode] = useState<Mode>('table');
   const [wrapRaw, setWrapRaw] = useState(false);
   const [state, setState] = useState<LoadState>({ status: 'idle' });
+  const [tableState, setTableState] = useState<TableState>({ status: 'idle' });
+  const [pageRequest, setPageRequest] = useState<PageRequest>(DEFAULT_PAGE_REQUEST);
+  const [queryRequest, setQueryRequest] = useState<PageRequest>(DEFAULT_PAGE_REQUEST);
+  const tableEngineRef = useRef<RowserTableEngine | null>(null);
 
   const params = useMemo(() => new URLSearchParams(location.search), []);
 
@@ -35,11 +57,79 @@ export function App() {
 
     if (decision.kind === 'none') {
       setState({ status: 'ready', source });
+      setPageRequest(DEFAULT_PAGE_REQUEST);
+      setQueryRequest(DEFAULT_PAGE_REQUEST);
+      setTableState({ status: 'idle' });
       return;
     }
 
     setState({ status: 'deciding-large-file', source, decision });
   }
+
+  useEffect(() => {
+    return () => {
+      void tableEngineRef.current?.dispose();
+    };
+  }, []);
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => setQueryRequest(pageRequest), 300);
+    return () => window.clearTimeout(timeout);
+  }, [pageRequest]);
+
+  useEffect(() => {
+    if (state.status !== 'ready') {
+      void tableEngineRef.current?.dispose();
+      tableEngineRef.current = null;
+      setTableState({ status: 'idle' });
+      return;
+    }
+
+    if (mode !== 'table') {
+      return;
+    }
+
+    let active = true;
+
+    async function loadTable(source: RowserSource) {
+      const existingMetadata =
+        tableState.status === 'ready' || tableState.status === 'querying' || tableState.status === 'error'
+          ? tableState.metadata
+          : null;
+
+      setTableState(existingMetadata ? { status: 'querying', metadata: existingMetadata } : { status: 'importing' });
+
+      try {
+        const engine = tableEngineRef.current ?? createDuckDbTableEngine();
+        tableEngineRef.current = engine;
+        const metadata = existingMetadata ?? (await engine.importSource(source));
+        const page = await engine.getPage(queryRequest);
+
+        if (!active) {
+          return;
+        }
+
+        setTableState({ status: 'ready', metadata, page });
+      } catch (error) {
+        if (!active) {
+          return;
+        }
+
+        setTableState({
+          status: 'error',
+          title: 'Table import failed',
+          detail: error instanceof Error ? error.message : String(error),
+          metadata: existingMetadata
+        });
+      }
+    }
+
+    void loadTable(state.source);
+
+    return () => {
+      active = false;
+    };
+  }, [mode, queryRequest, state]);
 
   useEffect(() => {
     const token = params.get('token');
@@ -110,6 +200,9 @@ export function App() {
         {state.status === 'ready' ? (
           <p>
             {state.source.name} · {formatBytes(state.source.size)}
+            {tableState.status === 'ready'
+              ? ` · ${tableState.metadata.rowCount} rows x ${tableState.page.columns.length} columns`
+              : ''}
           </p>
         ) : null}
       </header>
@@ -129,6 +222,17 @@ export function App() {
         >
           Raw
         </button>
+        {mode === 'table' && state.status === 'ready' ? (
+          <input
+            className="viewer__search"
+            type="search"
+            placeholder="Search..."
+            value={pageRequest.search}
+            onChange={(event) =>
+              setPageRequest({ ...pageRequest, page: 0, search: event.currentTarget.value })
+            }
+          />
+        ) : null}
         {mode === 'raw' ? (
           <label className="viewer__wrap">
             <input
@@ -162,7 +266,13 @@ export function App() {
           />
         ) : null}
         {state.status === 'error' ? <ErrorState title={state.title} detail={state.detail} /> : null}
-        {state.status === 'ready' && mode === 'table' ? <TablePlaceholder source={state.source} /> : null}
+        {state.status === 'ready' && mode === 'table' ? (
+          <TablePanel
+            tableState={tableState}
+            pageRequest={pageRequest}
+            onPageRequestChange={setPageRequest}
+          />
+        ) : null}
         {state.status === 'ready' && mode === 'raw' ? (
           <RawView source={state.source} wrapLines={wrapRaw} />
         ) : null}
@@ -203,12 +313,43 @@ function Status({ label }: { label: string }) {
   return <div className="empty-state">{label}...</div>;
 }
 
-function TablePlaceholder({ source }: { source: RowserSource }) {
+function TablePanel({
+  tableState,
+  pageRequest,
+  onPageRequestChange
+}: {
+  tableState: TableState;
+  pageRequest: PageRequest;
+  onPageRequestChange: (request: PageRequest) => void;
+}) {
+  if (tableState.status === 'importing') {
+    return <Status label="Importing into DuckDB" />;
+  }
+
+  if (tableState.status === 'querying') {
+    return <Status label="Running query" />;
+  }
+
+  if (tableState.status === 'error') {
+    return <ErrorState title={tableState.title} detail={tableState.detail} />;
+  }
+
+  if (tableState.status !== 'ready') {
+    return <Status label="Preparing table" />;
+  }
+
   return (
-    <div className="table-placeholder">
-      <p>
-        Table mode will import {source.name} into DuckDB-WASM in the next implementation task.
-      </p>
+    <div className="table-view">
+      <DataTable
+        page={tableState.page}
+        sort={pageRequest.sort}
+        onSortChange={(sort) => onPageRequestChange({ ...pageRequest, page: 0, sort })}
+      />
+      <Pagination
+        page={tableState.page}
+        request={pageRequest}
+        onRequestChange={onPageRequestChange}
+      />
     </div>
   );
 }

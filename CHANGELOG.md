@@ -2,6 +2,14 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.4.0
+
+- Added DuckDB-WASM browser bundling for the Chrome viewer.
+- Added a table engine that registers the loaded Blob, imports CSV/TSV data into `rowser_data`, and tracks stable `__rowser_rowid` ordering.
+- Added metadata loading and paginated page queries through prepared statements.
+- Replaced the Table placeholder with a real table view, sortable headers, search input, page size selector, and previous/next pagination.
+- Added integration coverage for the table engine contract.
+
 ## v0.3.0
 
 - Added shared table engine interfaces for metadata, pagination requests, and table pages.
