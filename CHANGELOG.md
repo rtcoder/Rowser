@@ -2,6 +2,12 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.5.0
+
+- Added Playwright configuration for browser-level viewer checks.
+- Added an end-to-end test for opening a local CSV, importing it into the table, searching rows, and using sortable headers.
+- Ignored Playwright runtime artifacts from test runs.
+
 ## v0.4.1
 
 - Added DOM-level unit coverage for the table and pagination controls.

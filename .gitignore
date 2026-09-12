@@ -3,3 +3,5 @@ dist/
 .pnpm-store/
 .idea/
 *.log
+test-results/
+playwright-report/

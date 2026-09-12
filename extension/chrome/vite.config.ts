@@ -22,9 +22,5 @@ export default defineConfig({
         assetFileNames: 'assets/[name]-[hash][extname]'
       }
     }
-  },
-  test: {
-    environment: 'jsdom',
-    globals: true
   }
 });
