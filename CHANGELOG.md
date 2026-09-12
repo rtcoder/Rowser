@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.4.1
+
+- Added DOM-level unit coverage for the table and pagination controls.
+- Verified null rendering, sort cycling, page boundary buttons, row ranges, and page-size resets.
+
 ## v0.4.0
 
 - Added DuckDB-WASM browser bundling for the Chrome viewer.
