@@ -2,6 +2,12 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.6.0
+
+- Added a reusable extension packaging script for Chrome now and Firefox later.
+- Added a local `package:chrome` command that creates versioned release ZIPs from `dist/chrome`.
+- Updated the release workflow to use the shared packaging script instead of inline ZIP commands.
+
 ## v0.5.1
 
 - Added Chrome Web Store draft listing copy with privacy and permissions notes.

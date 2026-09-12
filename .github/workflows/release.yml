@@ -35,11 +35,7 @@ jobs:
         run: pnpm build:chrome
 
       - name: Package Chrome extension
-        run: |
-          tag="${GITHUB_REF_NAME}"
-          mkdir -p artifacts
-          cd dist/chrome
-          zip -r "../../artifacts/rowser-chrome-${tag}.zip" .
+        run: sh scripts/package-extension.sh chrome "$GITHUB_REF_NAME"
 
       - name: Detect Firefox target
         id: firefox
@@ -57,10 +53,7 @@ jobs:
 
       - name: Package Firefox extension
         if: steps.firefox.outputs.enabled == 'true'
-        run: |
-          tag="${GITHUB_REF_NAME}"
-          cd dist/firefox
-          zip -r "../../artifacts/rowser-firefox-${tag}.zip" .
+        run: sh scripts/package-extension.sh firefox "$GITHUB_REF_NAME"
 
       - name: Prepare release notes
         run: |
