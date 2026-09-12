@@ -2,6 +2,14 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.3.0
+
+- Added shared table engine interfaces for metadata, pagination requests, and table pages.
+- Added safe DuckDB query generation for table pagination, global search, and single-column sorting.
+- Validated sort columns against imported metadata before quoting identifiers.
+- Bound global search text as query parameters and excluded `__rowser_rowid` from visible search columns.
+- Added unit coverage for identifier quoting, stable row ordering, SQL-backed pagination, and SQL injection resistance.
+
 ## v0.2.0
 
 - Added Raw mode chunk planning and chunked reading for files above 10 MB.
