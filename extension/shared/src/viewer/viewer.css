@@ -106,6 +106,79 @@ input {
   color: #b42318;
 }
 
+.large-file {
+  display: grid;
+  gap: 12px;
+  max-width: 560px;
+  padding: 32px 16px;
+  margin: 0 auto;
+}
+
+.large-file h2,
+.large-file p {
+  margin: 0;
+}
+
+.large-file h2 {
+  font-size: 20px;
+}
+
+.large-file__source {
+  color: color-mix(in srgb, CanvasText 64%, transparent);
+  font-size: 13px;
+}
+
+.large-file__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.large-file__actions button {
+  border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+  border-radius: 6px;
+  padding: 7px 11px;
+  background: ButtonFace;
+  color: ButtonText;
+  cursor: pointer;
+}
+
+.raw-view {
+  display: grid;
+  min-height: 100%;
+  grid-template-rows: auto 1fr;
+}
+
+.raw-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid color-mix(in srgb, CanvasText 14%, transparent);
+  padding: 8px 16px;
+  color: color-mix(in srgb, CanvasText 68%, transparent);
+  font-size: 13px;
+}
+
+.raw-controls button {
+  border: 1px solid color-mix(in srgb, CanvasText 18%, transparent);
+  border-radius: 6px;
+  padding: 5px 9px;
+  background: ButtonFace;
+  color: ButtonText;
+  cursor: pointer;
+}
+
+.raw-controls button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+.raw-status {
+  margin: 0;
+  padding: 16px;
+  color: color-mix(in srgb, CanvasText 68%, transparent);
+}
+
 .raw {
   box-sizing: border-box;
   min-height: 100%;

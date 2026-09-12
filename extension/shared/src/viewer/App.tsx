@@ -1,16 +1,26 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PRODUCT_NAME, TAGLINE } from '../shared/constants';
 import { formatBytes } from '../shared/format-bytes';
+import { DropZone } from './components/DropZone';
+import { ErrorState } from './components/ErrorState';
+import { LargeFileDialog } from './components/LargeFileDialog';
+import { RawView } from './components/RawView';
 import { consumeNavigationHandoff } from './handoff/navigation-handoff';
 import { loadLocalSource } from './source/local-source';
 import { loadRemoteSource } from './source/remote-source';
 import type { RowserSource } from './source/source-types';
+import { getFileSizeDecision, type FileSizeDecision } from './state/file-size-policy';
 
 type Mode = 'table' | 'raw';
 type LoadState =
   | { status: 'idle' }
   | { status: 'loading'; label: string }
-  | { status: 'ready'; source: RowserSource; rawText: string | null }
+  | {
+      status: 'deciding-large-file';
+      source: RowserSource;
+      decision: Exclude<FileSizeDecision, { kind: 'none' }>;
+    }
+  | { status: 'ready'; source: RowserSource }
   | { status: 'error'; title: string; detail: string };
 
 export function App() {
@@ -19,6 +29,17 @@ export function App() {
   const [state, setState] = useState<LoadState>({ status: 'idle' });
 
   const params = useMemo(() => new URLSearchParams(location.search), []);
+
+  function acceptSource(source: RowserSource) {
+    const decision = getFileSizeDecision(source.size);
+
+    if (decision.kind === 'none') {
+      setState({ status: 'ready', source });
+      return;
+    }
+
+    setState({ status: 'deciding-large-file', source, decision });
+  }
 
   useEffect(() => {
     const token = params.get('token');
@@ -50,8 +71,8 @@ export function App() {
 
     void resolveUrl()
       .then((url) => loadRemoteSource(url, controller.signal))
-      .then(async (source) => {
-        setState({ status: 'ready', source, rawText: await source.blob.text() });
+      .then((source) => {
+        acceptSource(source);
       })
       .catch((error: unknown) => {
         setState({
@@ -69,7 +90,7 @@ export function App() {
 
     try {
       const source = await loadLocalSource(file);
-      setState({ status: 'ready', source, rawText: await source.blob.text() });
+      acceptSource(source);
     } catch (error) {
       setState({
         status: 'error',
@@ -79,16 +100,8 @@ export function App() {
     }
   }
 
-  function handleDrop(event: React.DragEvent<HTMLElement>) {
-    event.preventDefault();
-    const file = event.dataTransfer.files.item(0);
-    if (file) {
-      void handleFile(file);
-    }
-  }
-
   return (
-    <main className="viewer" onDragOver={(event) => event.preventDefault()} onDrop={handleDrop}>
+    <DropZone onFile={(file) => void handleFile(file)}>
       <header className="viewer__header">
         <div>
           <strong>{PRODUCT_NAME}</strong>
@@ -129,15 +142,32 @@ export function App() {
       </nav>
 
       <section className="viewer__body">
-        {state.status === 'idle' ? <FilePrompt onFile={handleFile} localMode={params.get('mode') === 'local'} /> : null}
+        {state.status === 'idle' ? (
+          <FilePrompt onFile={handleFile} localMode={params.get('mode') === 'local'} />
+        ) : null}
         {state.status === 'loading' ? <Status label={state.label} /> : null}
+        {state.status === 'deciding-large-file' ? (
+          <LargeFileDialog
+            decision={state.decision}
+            sourceName={state.source.name}
+            onOpenTable={() => {
+              setMode('table');
+              setState({ status: 'ready', source: state.source });
+            }}
+            onShowRaw={() => {
+              setMode('raw');
+              setState({ status: 'ready', source: state.source });
+            }}
+            onCancel={() => setState({ status: 'idle' })}
+          />
+        ) : null}
         {state.status === 'error' ? <ErrorState title={state.title} detail={state.detail} /> : null}
         {state.status === 'ready' && mode === 'table' ? <TablePlaceholder source={state.source} /> : null}
         {state.status === 'ready' && mode === 'raw' ? (
-          <pre className={wrapRaw ? 'raw raw--wrap' : 'raw'}>{state.rawText}</pre>
+          <RawView source={state.source} wrapLines={wrapRaw} />
         ) : null}
       </section>
-    </main>
+    </DropZone>
   );
 }
 
@@ -150,7 +180,11 @@ function FilePrompt({
 }) {
   return (
     <div className="empty-state">
-      <p>{localMode ? 'Choose a CSV or TSV file.' : 'Open a CSV or TSV URL from the popup, or drop a file here.'}</p>
+      <p>
+        {localMode
+          ? 'Choose a CSV or TSV file.'
+          : 'Open a CSV or TSV URL from the popup, or drop a file here.'}
+      </p>
       <input
         type="file"
         accept=".csv,.tsv,text/csv,text/tab-separated-values"
@@ -169,19 +203,12 @@ function Status({ label }: { label: string }) {
   return <div className="empty-state">{label}...</div>;
 }
 
-function ErrorState({ title, detail }: { title: string; detail: string }) {
-  return (
-    <div className="error-state">
-      <h2>{title}</h2>
-      <p>{detail}</p>
-    </div>
-  );
-}
-
 function TablePlaceholder({ source }: { source: RowserSource }) {
   return (
     <div className="table-placeholder">
-      <p>Table mode will import {source.name} into DuckDB-WASM in the next implementation task.</p>
+      <p>
+        Table mode will import {source.name} into DuckDB-WASM in the next implementation task.
+      </p>
     </div>
   );
 }

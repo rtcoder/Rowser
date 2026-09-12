@@ -2,6 +2,13 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.2.0
+
+- Added Raw mode chunk planning and chunked reading for files above 10 MB.
+- Added Raw view controls for previous/next chunk navigation and byte range display.
+- Split viewer file drop, error display, and raw rendering into focused components.
+- Added unit coverage for raw chunking and source-name helpers.
+
 ## v0.1.1
 
 - Switched automatic CSV/TSV opening to Chrome `declarativeNetRequest` redirects so Chrome does not start downloading matching document responses before Rowser opens.

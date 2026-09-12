@@ -6,10 +6,33 @@ export interface RawChunk {
   start: number;
   end: number;
   total: number;
+  chunkIndex: number;
+  chunkCount: number;
+}
+
+export interface RawReadPlan {
+  mode: 'full' | 'chunked';
+  chunkCount: number;
+}
+
+export function getRawReadPlan(size: number): RawReadPlan {
+  if (size <= FULL_RAW_RENDER_LIMIT_BYTES) {
+    return {
+      mode: 'full',
+      chunkCount: 1
+    };
+  }
+
+  return {
+    mode: 'chunked',
+    chunkCount: Math.ceil(size / RAW_CHUNK_SIZE_BYTES)
+  };
 }
 
 export async function readRawChunk(blob: Blob, chunkIndex: number): Promise<RawChunk> {
-  const start = Math.max(0, chunkIndex) * RAW_CHUNK_SIZE_BYTES;
+  const plan = getRawReadPlan(blob.size);
+  const boundedChunkIndex = clampChunkIndex(chunkIndex, plan.chunkCount);
+  const start = plan.mode === 'full' ? 0 : boundedChunkIndex * RAW_CHUNK_SIZE_BYTES;
   const end = Math.min(blob.size, start + RAW_CHUNK_SIZE_BYTES);
   const text = await blob.slice(start, end).text();
 
@@ -17,6 +40,16 @@ export async function readRawChunk(blob: Blob, chunkIndex: number): Promise<RawC
     text,
     start,
     end,
-    total: blob.size
+    total: blob.size,
+    chunkIndex: boundedChunkIndex,
+    chunkCount: plan.chunkCount
   };
+}
+
+function clampChunkIndex(chunkIndex: number, chunkCount: number): number {
+  if (!Number.isFinite(chunkIndex) || chunkIndex < 0) {
+    return 0;
+  }
+
+  return Math.min(Math.floor(chunkIndex), Math.max(0, chunkCount - 1));
 }
