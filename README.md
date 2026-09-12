@@ -10,6 +10,7 @@ available.
 
 ```bash
 pnpm install
+pnpm exec playwright install chromium
 pnpm test
 pnpm test:e2e
 pnpm build

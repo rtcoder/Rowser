@@ -2,6 +2,12 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.7.0
+
+- Added Chromium extension e2e coverage for automatic top-level CSV navigation.
+- Verified the packaged extension installs DNR redirect rules and opens the built viewer for CSV documents.
+- Standardized Playwright e2e runs on the bundled Chromium channel.
+
 ## v0.6.0
 
 - Added a reusable extension packaging script for Chrome now and Firefox later.
