@@ -2,6 +2,10 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.7.4
+
+- Added packaged-extension e2e coverage for quoted CSV values, multiline cells, and mixed-type columns.
+
 ## v0.7.3
 
 - Added packaged-extension e2e coverage for manual URL opening.

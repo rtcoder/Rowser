@@ -72,6 +72,58 @@ test('opens a manual URL in the packaged Chrome viewer', async () => {
   }
 });
 
+test('imports quoted CSV values without splitting embedded commas or quotes', async () => {
+  const fixtureServer = await startFixtureServer();
+  const browser = await launchExtension();
+
+  try {
+    const page = await openManualUrl(browser.context, fixtureServer.url('/quoted.csv'));
+
+    await expect(page.getByRole('region', { name: 'CSV table' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'Hello, world' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'A "quoted" value' })).toBeVisible();
+    await expect(page.getByText('1-2 of 2')).toBeVisible();
+  } finally {
+    await browser.close();
+    await fixtureServer.close();
+  }
+});
+
+test('imports multiline CSV cells as a single row value', async () => {
+  const fixtureServer = await startFixtureServer();
+  const browser = await launchExtension();
+
+  try {
+    const page = await openManualUrl(browser.context, fixtureServer.url('/multiline.csv'));
+
+    await expect(page.getByRole('region', { name: 'CSV table' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: /line one\s+line two/ })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'single line' })).toBeVisible();
+    await expect(page.getByText('1-2 of 2')).toBeVisible();
+  } finally {
+    await browser.close();
+    await fixtureServer.close();
+  }
+});
+
+test('imports mixed-type CSV columns without dropping text values', async () => {
+  const fixtureServer = await startFixtureServer();
+  const browser = await launchExtension();
+
+  try {
+    const page = await openManualUrl(browser.context, fixtureServer.url('/mixed-types.csv'));
+
+    await expect(page.getByRole('region', { name: 'CSV table' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: '100' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'text' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: '300' })).toBeVisible();
+    await expect(page.getByText('1-3 of 3')).toBeVisible();
+  } finally {
+    await browser.close();
+    await fixtureServer.close();
+  }
+});
+
 test('redirects a top-level TSV navigation to the packaged Chrome viewer', async () => {
   const fixtureServer = await startFixtureServer();
   const browser = await launchExtension();
@@ -183,6 +235,33 @@ async function startFixtureServer(): Promise<FixtureServer> {
       return;
     }
 
+    if (pathname === '/quoted.csv') {
+      response.writeHead(200, {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'text/csv'
+      });
+      response.end('id,title,note\n1,"Hello, world","A ""quoted"" value"\n2,"Second","plain"\n');
+      return;
+    }
+
+    if (pathname === '/multiline.csv') {
+      response.writeHead(200, {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'text/csv'
+      });
+      response.end('id,note\n1,"line one\nline two"\n2,"single line"\n');
+      return;
+    }
+
+    if (pathname === '/mixed-types.csv') {
+      response.writeHead(200, {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'text/csv'
+      });
+      response.end('id,value\n1,100\n2,text\n3,300\n');
+      return;
+    }
+
     if (pathname === '/attachment.csv') {
       response.writeHead(200, {
         'Content-Disposition': 'attachment; filename="attachment.csv"',
@@ -273,6 +352,13 @@ async function extensionUrl(context: BrowserContext, pathInExtension: string): P
     context.serviceWorkers()[0] ??
     (await context.waitForEvent('serviceworker', { timeout: 5_000 }));
   return serviceWorker.evaluate((pathName) => chrome.runtime.getURL(pathName), pathInExtension);
+}
+
+async function openManualUrl(context: BrowserContext, sourceUrl: string) {
+  const viewerUrl = await extensionUrl(context, 'viewer.html');
+  const page = await context.newPage();
+  await page.goto(`${viewerUrl}?url=${encodeURIComponent(sourceUrl)}`);
+  return page;
 }
 
 function close(server: Server): Promise<void> {
