@@ -23,7 +23,8 @@ export function App() {
   useEffect(() => {
     const token = params.get('token');
     const directUrl = params.get('url');
-    if (!directUrl && !token) {
+    const hashUrl = location.hash.startsWith('#http') ? location.hash.slice(1) : null;
+    if (!directUrl && !token && !hashUrl) {
       return;
     }
 
@@ -31,6 +32,10 @@ export function App() {
     setState({ status: 'loading', label: 'Loading source' });
 
     const resolveUrl = async () => {
+      if (hashUrl) {
+        return hashUrl;
+      }
+
       if (directUrl) {
         return directUrl;
       }

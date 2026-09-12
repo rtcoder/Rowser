@@ -4,7 +4,7 @@
 
 **Goal:** Build **Rowser**, a Chromium-first Manifest V3 extension that instantly turns CSV and TSV documents into a searchable, sortable table while always allowing the user to switch back to the raw file.
 
-**Architecture:** Rowser observes top-level document responses, recognizes inline CSV/TSV by URL extension or response MIME type, and replaces the tab with an extension-owned viewer. The viewer loads the original source once, keeps it locally for the lifetime of the tab, imports it into DuckDB-WASM for table operations, and exposes a `Table | Raw` UI. Local files and manually entered URLs use the same viewer and source abstraction.
+**Architecture:** Rowser observes top-level document responses, recognizes inline CSV/TSV by URL extension or response MIME type, and redirects the tab to an extension-owned viewer. The viewer loads the original source once, keeps it locally for the lifetime of the tab, imports it into DuckDB-WASM for table operations, and exposes a `Table | Raw` UI. Local files and manually entered URLs use the same viewer and source abstraction.
 
 **Tech Stack:** TypeScript, React, Vite, Chromium Manifest V3, `@duckdb/duckdb-wasm`, CSS modules/plain CSS, Vitest, React Testing Library, Playwright Chromium extension tests.
 
@@ -178,7 +178,7 @@ Initial manifest permissions:
 {
   "permissions": [
     "storage",
-    "webRequest"
+    "declarativeNetRequest"
   ],
   "host_permissions": [
     "http://*/*",
@@ -187,7 +187,7 @@ Initial manifest permissions:
 }
 ```
 
-Use `chrome.storage.session` only for short-lived navigation handoff metadata. Do not store source contents there.
+Use `chrome.storage.session` only for short-lived navigation handoff metadata if a browser target needs it. Do not store source contents there.
 
 The extension must have no telemetry and no Rowser-controlled network endpoint.
 
@@ -201,18 +201,17 @@ Do not request permissions unrelated to the implemented feature set.
 
 # 4. Navigation handoff
 
-The service worker owns automatic detection.
+The Chrome service worker owns automatic detection.
 
-On an eligible top-level response:
+On Chrome, install dynamic `chrome.declarativeNetRequest` redirect rules for
+eligible top-level responses:
 
-1. Read URL and response headers.
-2. Confirm request method is GET.
+1. Restrict rules to `main_frame` HTTP/HTTPS traffic.
+2. Match URL extension `.csv` or `.tsv`, or supported CSV/TSV response MIME types.
 3. Reject `Content-Disposition: attachment`.
-4. Confirm URL extension or supported MIME type.
-5. Generate a random navigation token with `crypto.randomUUID()`.
-6. Store metadata in `chrome.storage.session` using that token.
-7. Replace the current tab URL with:
-   `chrome-extension://<id>/viewer.html?token=<uuid>`.
+4. Redirect to:
+   `chrome-extension://<id>/viewer.html#<original-url>`.
+5. The viewer reads the original URL from the fragment and fetches the source once.
 
 Stored metadata shape:
 
@@ -227,7 +226,9 @@ export interface NavigationHandoff {
 }
 ```
 
-Delete the handoff from session storage after the viewer consumes it.
+Firefox may use a different handoff strategy when that target is implemented.
+If a target uses session-storage handoff, delete the handoff after the viewer
+consumes it.
 
 Reject handoffs older than 60 seconds.
 

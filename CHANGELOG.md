@@ -2,6 +2,12 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.1.1
+
+- Switched automatic CSV/TSV opening to Chrome `declarativeNetRequest` redirects so Chrome does not start downloading matching document responses before Rowser opens.
+- Kept attachment responses excluded from automatic opening.
+- Preserved MIME-only CSV/TSV detection through response-header redirect rules.
+
 ## v0.1
 
 - Bootstrapped the Chromium Manifest V3 extension with Vite, React, and TypeScript.

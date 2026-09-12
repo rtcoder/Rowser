@@ -2,9 +2,9 @@
   "manifest_version": 3,
   "name": "Rowser",
   "description": "Instant CSV & TSV Viewer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "minimum_chrome_version": "128",
-  "permissions": ["storage", "webRequest"],
+  "permissions": ["storage", "declarativeNetRequest"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": {
     "service_worker": "service-worker.js",
@@ -16,5 +16,11 @@
   },
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
-  }
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["viewer.html"],
+      "matches": ["http://*/*", "https://*/*"]
+    }
+  ]
 }
