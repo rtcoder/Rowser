@@ -33,4 +33,14 @@ describe('ErrorState', () => {
 
     expect(onOpenAnotherFile).toHaveBeenCalledTimes(1);
   });
+
+  test('calls the raw fallback action when available', async () => {
+    const user = userEvent.setup();
+    const onShowRaw = vi.fn();
+    render(<ErrorState title="Table import failed" detail="Could not parse source" onShowRaw={onShowRaw} />);
+
+    await user.click(screen.getByRole('button', { name: 'Show raw' }));
+
+    expect(onShowRaw).toHaveBeenCalledTimes(1);
+  });
 });

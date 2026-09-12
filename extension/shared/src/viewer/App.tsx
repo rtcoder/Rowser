@@ -288,6 +288,7 @@ export function App() {
             tableState={tableState}
             pageRequest={pageRequest}
             onPageRequestChange={setPageRequest}
+            onShowRaw={() => setMode('raw')}
           />
         ) : null}
         {state.status === 'ready' && mode === 'raw' ? (
@@ -314,6 +315,7 @@ function FilePrompt({
       </p>
       <input
         type="file"
+        aria-label="Choose CSV or TSV file"
         accept=".csv,.tsv,text/csv,text/tab-separated-values"
         onChange={(event) => {
           const file = event.currentTarget.files?.item(0);
@@ -333,11 +335,13 @@ function Status({ label }: { label: string }) {
 function TablePanel({
   tableState,
   pageRequest,
-  onPageRequestChange
+  onPageRequestChange,
+  onShowRaw
 }: {
   tableState: TableState;
   pageRequest: PageRequest;
   onPageRequestChange: (request: PageRequest) => void;
+  onShowRaw: () => void;
 }) {
   if (tableState.status === 'importing') {
     return <Status label="Importing into DuckDB" />;
@@ -348,7 +352,13 @@ function TablePanel({
   }
 
   if (tableState.status === 'error') {
-    return <ErrorState title={tableState.title} detail={tableState.detail} />;
+    return (
+      <ErrorState
+        title={tableState.title}
+        detail={tableState.detail}
+        onShowRaw={onShowRaw}
+      />
+    );
   }
 
   if (tableState.status !== 'ready') {

@@ -2,6 +2,12 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.8.1
+
+- Kept Raw mode directly reachable after table import errors.
+- Added a Raw reader fallback for blob slices without `text()`.
+- Added recovery coverage for table import failures.
+
 ## v0.8.0
 
 - Added an `Open another file` recovery action for viewer load errors.

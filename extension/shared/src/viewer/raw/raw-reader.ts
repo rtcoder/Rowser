@@ -34,7 +34,7 @@ export async function readRawChunk(blob: Blob, chunkIndex: number): Promise<RawC
   const boundedChunkIndex = clampChunkIndex(chunkIndex, plan.chunkCount);
   const start = plan.mode === 'full' ? 0 : boundedChunkIndex * RAW_CHUNK_SIZE_BYTES;
   const end = Math.min(blob.size, start + RAW_CHUNK_SIZE_BYTES);
-  const text = await blob.slice(start, end).text();
+  const text = await readBlobText(blob.slice(start, end));
 
   return {
     text,
@@ -52,4 +52,23 @@ function clampChunkIndex(chunkIndex: number, chunkCount: number): number {
   }
 
   return Math.min(Math.floor(chunkIndex), Math.max(0, chunkCount - 1));
+}
+
+async function readBlobText(blob: Blob): Promise<string> {
+  if (typeof blob.text === 'function') {
+    return blob.text();
+  }
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.addEventListener('load', () => {
+      resolve(typeof reader.result === 'string' ? reader.result : '');
+    });
+    reader.addEventListener('error', () => {
+      reject(reader.error ?? new Error('Could not read blob text'));
+    });
+
+    reader.readAsText(blob);
+  });
 }
