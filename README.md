@@ -16,6 +16,12 @@ pnpm build
 
 Load `dist/chrome/` as an unpacked extension after building.
 
+## Versioning
+
+Rowser starts at `v0.1`. Before `v1.0`, patch versions are for fixes,
+packaging, and release infrastructure; minor versions are for meaningful
+feature milestones.
+
 ## Repository Layout
 
 - `docs/` is reserved for documentation and GitHub Pages.
