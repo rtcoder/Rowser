@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v1.2.0
+
+- Adds Firefox automatic CSV/TSV navigation interception with a Firefox-specific `webRequest.onHeadersReceived` redirect flow.
+- Updates Firefox permissions and documentation now that auto-open is available in both browser targets.
+
 ## v1.1.1
 
 - Updates README documentation for the Firefox build target and clarifies that automatic CSV/TSV navigation interception is still Chromium-only.

@@ -5,9 +5,9 @@ Rowser — Instant CSV & TSV Viewer.
 Rowser is a browser extension that opens CSV and TSV documents in a searchable
 table viewer while keeping the original raw text available.
 
-The Chromium target can automatically redirect eligible top-level CSV and TSV
-responses into the viewer. The Firefox target currently supports manual URL
-opening, local files, drag-and-drop, Table mode, and Raw mode.
+The Chromium and Firefox targets can automatically redirect eligible top-level
+CSV and TSV responses into the viewer. Manual URL opening, local files,
+drag-and-drop, Table mode, and Raw mode are shared across both targets.
 
 ## Development
 
@@ -50,8 +50,9 @@ The Chromium target requests `declarativeNetRequest`, `storage`, and broad
 top-level CSV and TSV document responses into the extension viewer. It uses
 `storage.session` only for short-lived navigation handoff metadata.
 
-The Firefox target requests `storage` and host permissions for manual URL
-opening. Automatic navigation interception is not implemented there yet.
+The Firefox target requests `webRequest`, `webRequestBlocking`, `storage`, and
+host permissions so Firefox can redirect eligible top-level CSV and TSV
+responses into the same viewer.
 
 ## Privacy
 

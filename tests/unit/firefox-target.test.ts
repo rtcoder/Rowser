@@ -33,6 +33,7 @@ describe('Firefox build target', () => {
     expect(manifest.background.scripts).toEqual(['background.js']);
     expect(manifest.background.service_worker).toBeUndefined();
     expect(manifest.permissions).not.toContain('declarativeNetRequest');
+    expect(manifest.permissions).toEqual(['storage', 'webRequest', 'webRequestBlocking']);
     expect(manifest.browser_specific_settings?.gecko?.id).toBe('@rowser');
     expect(manifest.browser_specific_settings?.gecko?.data_collection_permissions).toEqual({
       required: ['none']
