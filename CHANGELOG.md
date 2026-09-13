@@ -2,6 +2,10 @@
 
 All notable changes to Rowser are listed here.
 
+## v1.0.1
+
+- Installs Playwright Chromium in the tag-push release workflow before running E2E checks.
+
 ## v1.0.0
 
 - Declared Rowser v1 stable for Chromium-based browsers.
