@@ -16,6 +16,9 @@ describe('Firefox build target', () => {
     expect(packageJson.scripts['verify:no-remote-code:firefox']).toBe(
       'sh scripts/verify-no-remote-code.sh firefox'
     );
+    expect(packageJson.scripts['lint:firefox']).toBe(
+      'web-ext lint --source-dir dist/firefox --self-hosted'
+    );
   });
 
   it('uses a Firefox-compatible manifest without Chromium-only DNR permissions', () => {

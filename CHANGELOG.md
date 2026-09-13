@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v1.2.1
+
+- Adds Mozilla `web-ext` linting for the Firefox build output and runs it in the release workflow.
+- Bumps Chrome and Firefox extension manifests to `1.2.1`.
+
 ## v1.2.0
 
 - Adds Firefox automatic CSV/TSV navigation interception with a Firefox-specific `webRequest.onHeadersReceived` redirect flow.

@@ -61,6 +61,10 @@ jobs:
         if: steps.firefox.outputs.enabled == 'true'
         run: pnpm build:firefox
 
+      - name: Lint Firefox extension
+        if: steps.firefox.outputs.enabled == 'true'
+        run: pnpm lint:firefox
+
       - name: Package Firefox extension
         if: steps.firefox.outputs.enabled == 'true'
         run: sh scripts/package-extension.sh firefox "$GITHUB_REF_NAME"
