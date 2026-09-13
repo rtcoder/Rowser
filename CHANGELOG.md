@@ -2,6 +2,10 @@
 
 All notable changes to Rowser are listed here.
 
+## v1.0.5
+
+- Adds the GitHub Pages landing page in `docs` with Chrome Web Store CTA and existing store graphics.
+
 ## v1.0.4
 
 - Adds a 1280x800 Chrome Web Store table screenshot asset.

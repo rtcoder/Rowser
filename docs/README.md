@@ -1,4 +1,8 @@
-# Rowser Docs
+# Rowser GitHub Pages
 
-This directory is reserved for project documentation and the future GitHub Pages
-site. The implementation plan stays in the repository root as `codex.md`.
+This directory contains the GitHub Pages site and Chrome Web Store listing
+materials for Rowser.
+
+- `index.html` is the public landing page.
+- `chrome-web-store.md` contains listing copy.
+- `chrome-web-store/assets/` contains store graphics and screenshots.
