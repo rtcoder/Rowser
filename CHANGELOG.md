@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.9.3
+
+- Added Chrome extension icon assets in the required 16, 32, 48, and 128 px sizes.
+- Declared extension and action icons in the Chrome manifest.
+
 ## v0.9.2
 
 - Added viewer coverage for valid drag-and-drop CSV opening.
