@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.9.5
+
+- Documented why automated packaged-extension tests use bundled Chromium.
+- Added manual branded-Chrome verification guidance for loading `dist/chrome`.
+
 ## v0.9.4
 
 - Upgraded release workflow actions to Node 24 runtime-compatible versions.

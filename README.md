@@ -18,6 +18,10 @@ pnpm run verify:no-remote-code
 ```
 
 Load `dist/chrome/` as an unpacked extension after building.
+Automated extension tests use Playwright's bundled Chromium because official
+Google Chrome and Microsoft Edge no longer support the command-line flags used
+to side-load unpacked extensions. Verify branded Chrome manually through
+`chrome://extensions` → `Load unpacked`.
 
 ## Versioning
 
