@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.9.4
+
+- Upgraded release workflow actions to Node 24 runtime-compatible versions.
+- Disabled automatic package-manager caching in the release workflow.
+
 ## v0.9.3
 
 - Added Chrome extension icon assets in the required 16, 32, 48, and 128 px sizes.
