@@ -2,6 +2,10 @@
 
 All notable changes to Rowser are listed here.
 
+## v1.0.4
+
+- Adds a 1280x800 Chrome Web Store table screenshot asset.
+
 ## v1.0.3
 
 - Adds Chrome Web Store graphic assets: padded 128x128 store icon, required 440x280 small promo tile, and optional 1400x560 marquee promo tile.

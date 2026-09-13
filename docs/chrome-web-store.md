@@ -9,6 +9,7 @@ Instant CSV & TSV Viewer
 - Store icon: `docs/chrome-web-store/assets/store-icon-128.png` (128x128 PNG)
 - Small promo tile: `docs/chrome-web-store/assets/promo-small-440x280.png` (440x280 PNG)
 - Marquee promo tile: `docs/chrome-web-store/assets/promo-marquee-1400x560.png` (1400x560 PNG)
+- Table screenshot: `docs/chrome-web-store/assets/screenshot-table-1280x800.png` (1280x800 PNG)
 
 ## Description
 
