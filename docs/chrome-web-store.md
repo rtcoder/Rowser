@@ -4,6 +4,12 @@
 
 Instant CSV & TSV Viewer
 
+## Graphic Assets
+
+- Store icon: `docs/chrome-web-store/assets/store-icon-128.png` (128x128 PNG)
+- Small promo tile: `docs/chrome-web-store/assets/promo-small-440x280.png` (440x280 PNG)
+- Marquee promo tile: `docs/chrome-web-store/assets/promo-marquee-1400x560.png` (1400x560 PNG)
+
 ## Description
 
 Rowser opens CSV and TSV documents directly in your browser as a searchable,

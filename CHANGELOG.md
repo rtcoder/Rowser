@@ -2,6 +2,10 @@
 
 All notable changes to Rowser are listed here.
 
+## v1.0.3
+
+- Adds Chrome Web Store graphic assets: padded 128x128 store icon, required 440x280 small promo tile, and optional 1400x560 marquee promo tile.
+
 ## v1.0.2
 
 - Runs release E2E checks under Xvfb on GitHub-hosted Linux runners.
