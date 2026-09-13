@@ -79,7 +79,7 @@ test('recovers from a manual URL load error by opening another file', async () =
   try {
     const page = await openManualUrl(browser.context, fixtureServer.url('/missing.csv'));
 
-    await expect(page.getByRole('heading', { name: 'Network request failed' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'HTTP 404' })).toBeVisible();
     await expect(page.getByText('HTTP 404: Not Found')).toBeVisible();
 
     await page.getByRole('button', { name: 'Open another file' }).click();

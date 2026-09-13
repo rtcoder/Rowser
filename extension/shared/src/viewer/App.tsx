@@ -12,6 +12,7 @@ import type { PageRequest, RowserTableEngine, TableMetadata, TablePage } from '.
 import { consumeNavigationHandoff } from './handoff/navigation-handoff';
 import { loadLocalSource } from './source/local-source';
 import { loadRemoteSource } from './source/remote-source';
+import { classifySourceError } from './source/source-errors';
 import type { RowserSource } from './source/source-types';
 import { getFileSizeDecision, type FileSizeDecision } from './state/file-size-policy';
 
@@ -176,10 +177,11 @@ export function App() {
         acceptSource(source);
       })
       .catch((error: unknown) => {
+        const sourceError = classifySourceError(error);
         setState({
           status: 'error',
-          title: 'Network request failed',
-          detail: error instanceof Error ? error.message : String(error)
+          title: sourceError.title,
+          detail: sourceError.detail
         });
       });
 
@@ -193,10 +195,11 @@ export function App() {
       const source = await loadLocalSource(file);
       acceptSource(source);
     } catch (error) {
+      const sourceError = classifySourceError(error);
       setState({
         status: 'error',
-        title: 'Could not open file',
-        detail: error instanceof Error ? error.message : String(error)
+        title: sourceError.title,
+        detail: sourceError.detail
       });
     }
   }

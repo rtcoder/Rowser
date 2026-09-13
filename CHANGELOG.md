@@ -2,6 +2,12 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.8.3
+
+- Added explicit viewer error titles for empty files, unsupported local files, expired handoffs, and HTTP responses.
+- Kept generic browser failures grouped under network errors.
+- Added unit coverage for source-error classification and viewer source-error rendering.
+
 ## v0.8.2
 
 - Added a DuckDB import retry that loads columns as text when automatic type inference fails.
