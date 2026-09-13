@@ -367,6 +367,9 @@ function TablePanel({
 
   return (
     <div className="table-view">
+      {tableState.metadata.importNotice ? (
+        <p className="table-notice">{tableState.metadata.importNotice}</p>
+      ) : null}
       <DataTable
         page={tableState.page}
         sort={pageRequest.sort}

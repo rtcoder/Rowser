@@ -58,6 +58,57 @@ describe('DuckDbTableEngine', () => {
     );
   });
 
+  it('retries import with text columns when automatic type inference fails', async () => {
+    const queries: string[] = [];
+    const db = {
+      registerFileBuffer: async () => undefined,
+      dropFiles: async () => undefined,
+      terminate: async () => undefined
+    };
+    const connection = {
+      query: async (sql: string) => {
+        queries.push(sql);
+        if (sql.includes('read_csv_auto') && !sql.includes('all_varchar=true')) {
+          throw new Error('Could not convert string "text" to INT64');
+        }
+
+        if (sql.startsWith('PRAGMA')) {
+          return arrowTable([
+            { name: '__rowser_rowid', type: 'BIGINT' },
+            { name: 'id', type: 'VARCHAR' },
+            { name: 'value', type: 'VARCHAR' }
+          ]);
+        }
+
+        if (sql.startsWith('SELECT COUNT')) {
+          return arrowTable([{ row_count: 3 }]);
+        }
+
+        return arrowTable([]);
+      },
+      prepare: async () => {
+        throw new Error('prepare not expected');
+      },
+      close: async () => undefined
+    };
+    const engine = new DuckDbTableEngine({
+      createConnection: async () => ({ db, connection })
+    });
+
+    const metadata = await engine.importSource(source('id,value\n1,100\n2,text\n3,300\n'));
+
+    expect(metadata).toEqual({
+      columns: [
+        { name: '__rowser_rowid', type: 'BIGINT' },
+        { name: 'id', type: 'VARCHAR' },
+        { name: 'value', type: 'VARCHAR' }
+      ],
+      rowCount: 3,
+      importNotice: 'Some column types could not be inferred. Rowser loaded the file as text.'
+    });
+    expect(queries.some((sql) => sql.includes('all_varchar=true'))).toBe(true);
+  });
+
   it('returns a table page from prepared page and count queries', async () => {
     const preparedSql: string[] = [];
     const connection = {

@@ -2,6 +2,12 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.8.2
+
+- Added a DuckDB import retry that loads columns as text when automatic type inference fails.
+- Shows a non-blocking viewer notice when Rowser falls back to text columns.
+- Added integration and UI coverage for text-column fallback imports.
+
 ## v0.8.1
 
 - Kept Raw mode directly reachable after table import errors.

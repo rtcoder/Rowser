@@ -18,6 +18,7 @@ export interface TableMetadata {
     type: string;
   }>;
   rowCount: number;
+  importNotice?: string;
 }
 
 export interface TablePage {

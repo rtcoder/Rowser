@@ -170,6 +170,18 @@ input {
   grid-template-rows: 1fr auto;
 }
 
+.table-view:has(.table-notice) {
+  grid-template-rows: auto 1fr auto;
+}
+
+.table-notice {
+  margin: 0;
+  border-bottom: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+  padding: 8px 16px;
+  color: color-mix(in srgb, CanvasText 70%, transparent);
+  font-size: 13px;
+}
+
 .data-table {
   min-width: 0;
   overflow: auto;
