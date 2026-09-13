@@ -20,6 +20,7 @@ pnpm build:chrome
 pnpm build:firefox
 pnpm run verify:no-remote-code
 pnpm run verify:no-remote-code:firefox
+pnpm lint:firefox
 ```
 
 Load `dist/chrome/` as an unpacked extension after building Chromium, or
@@ -80,3 +81,8 @@ Recommended Chrome Web Store screenshots:
 ## Chrome Web Store
 
 Draft listing copy lives in `docs/chrome-web-store.md`.
+
+## Firefox Add-ons
+
+Firefox testing guidance lives in `docs/firefox-testing.md`. Reviewer notes for
+AMO live in `docs/firefox-amo-review-notes.md`.

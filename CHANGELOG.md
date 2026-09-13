@@ -2,6 +2,12 @@
 
 All notable changes to Rowser are listed here.
 
+## v1.2.3
+
+- Adds Firefox AMO reviewer notes for DuckDB/WASM, permissions, remote-code policy, and local data handling.
+- Adds a Firefox manual testing checklist for AMO submission smoke testing.
+- Bumps Chrome and Firefox extension manifests to `1.2.3`.
+
 ## v1.2.2
 
 - Makes the release workflow recover from GitHub API 500s that leave a partially-created draft release.
