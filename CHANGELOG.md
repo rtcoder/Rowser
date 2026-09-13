@@ -2,6 +2,13 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.9.0
+
+- Added streaming remote-source reads for responses without `Content-Length`.
+- Stops unknown-length remote sources after the recommended 512 MB limit and shows the oversized-file decision before table import.
+- Allows `Open anyway` and `Show raw` to refetch oversized unknown-length sources after an explicit user decision.
+- Added remote-source and viewer coverage for unknown-length oversized decisions.
+
 ## v0.8.5
 
 - Added the subtle `Large file` viewer status for files from 50 MB up to the warning threshold.

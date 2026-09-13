@@ -11,7 +11,7 @@ import { createDuckDbTableEngine } from './engine/duckdb-engine';
 import type { PageRequest, RowserTableEngine, TableMetadata, TablePage } from './engine/engine-types';
 import { consumeNavigationHandoff } from './handoff/navigation-handoff';
 import { loadLocalSource } from './source/local-source';
-import { loadRemoteSource } from './source/remote-source';
+import { loadRemoteSource, UnknownLengthLimitExceededError } from './source/remote-source';
 import { classifySourceError } from './source/source-errors';
 import type { RowserSource } from './source/source-types';
 import { getFileSizeDecision, type FileSizeDecision } from './state/file-size-policy';
@@ -24,6 +24,12 @@ type LoadState =
       status: 'deciding-large-file';
       source: RowserSource;
       decision: Exclude<FileSizeDecision, { kind: 'none' } | { kind: 'subtle' }>;
+    }
+  | {
+      status: 'deciding-remote-oversized';
+      sourceUrl: string;
+      sourceName: string;
+      decision: Exclude<FileSizeDecision, { kind: 'none' } | { kind: 'subtle' } | { kind: 'large' }>;
     }
   | { status: 'ready'; source: RowserSource }
   | { status: 'error'; title: string; detail: string };
@@ -53,10 +59,10 @@ export function App() {
 
   const params = useMemo(() => new URLSearchParams(location.search), []);
 
-  function acceptSource(source: RowserSource) {
+  function acceptSource(source: RowserSource, options: { skipSizeDecision?: boolean } = {}) {
     const decision = getFileSizeDecision(source.size);
 
-    if (decision.kind === 'none' || decision.kind === 'subtle') {
+    if (options.skipSizeDecision || decision.kind === 'none' || decision.kind === 'subtle') {
       setState({ status: 'ready', source });
       setPageRequest(DEFAULT_PAGE_REQUEST);
       setQueryRequest(DEFAULT_PAGE_REQUEST);
@@ -65,6 +71,46 @@ export function App() {
     }
 
     setState({ status: 'deciding-large-file', source, decision });
+  }
+
+  async function loadRemoteIntoViewer(
+    url: string,
+    controller: AbortController,
+    options: { allowUnknownLengthOverLimit?: boolean; mode?: Mode } = {}
+  ) {
+    setState({ status: 'loading', label: 'Loading source' });
+
+    try {
+      const source = await loadRemoteSource(url, controller.signal, {
+        allowUnknownLengthOverLimit: options.allowUnknownLengthOverLimit
+      });
+
+      if (options.mode === 'raw') {
+        setMode('raw');
+        setState({ status: 'ready', source });
+        return;
+      }
+
+      setMode('table');
+      acceptSource(source, { skipSizeDecision: options.allowUnknownLengthOverLimit });
+    } catch (error: unknown) {
+      if (error instanceof UnknownLengthLimitExceededError) {
+        setState({
+          status: 'deciding-remote-oversized',
+          sourceUrl: error.sourceUrl,
+          sourceName: error.sourceName,
+          decision: getOversizedDecision()
+        });
+        return;
+      }
+
+      const sourceError = classifySourceError(error);
+      setState({
+        status: 'error',
+        title: sourceError.title,
+        detail: sourceError.detail
+      });
+    }
   }
 
   function resetViewer() {
@@ -152,8 +198,6 @@ export function App() {
     }
 
     const controller = new AbortController();
-    setState({ status: 'loading', label: 'Loading source' });
-
     const resolveUrl = async () => {
       if (hashUrl) {
         return hashUrl;
@@ -171,12 +215,9 @@ export function App() {
       return handoff.sourceUrl;
     };
 
-    void resolveUrl()
-      .then((url) => loadRemoteSource(url, controller.signal))
-      .then((source) => {
-        acceptSource(source);
-      })
-      .catch((error: unknown) => {
+    void resolveUrl().then(
+      (url) => void loadRemoteIntoViewer(url, controller),
+      (error: unknown) => {
         const sourceError = classifySourceError(error);
         setState({
           status: 'error',
@@ -277,6 +318,25 @@ export function App() {
               setMode('raw');
               setState({ status: 'ready', source: state.source });
             }}
+            onCancel={() => setState({ status: 'idle' })}
+          />
+        ) : null}
+        {state.status === 'deciding-remote-oversized' ? (
+          <LargeFileDialog
+            decision={state.decision}
+            sourceName={state.sourceName}
+            onOpenTable={() =>
+              void loadRemoteIntoViewer(state.sourceUrl, new AbortController(), {
+                allowUnknownLengthOverLimit: true,
+                mode: 'table'
+              })
+            }
+            onShowRaw={() =>
+              void loadRemoteIntoViewer(state.sourceUrl, new AbortController(), {
+                allowUnknownLengthOverLimit: true,
+                mode: 'raw'
+              })
+            }
             onCancel={() => setState({ status: 'idle' })}
           />
         ) : null}
@@ -386,4 +446,17 @@ function TablePanel({
       />
     </div>
   );
+}
+
+function getOversizedDecision(): Exclude<
+  FileSizeDecision,
+  { kind: 'none' } | { kind: 'subtle' } | { kind: 'large' }
+> {
+  const decision = getFileSizeDecision(Number.MAX_SAFE_INTEGER);
+
+  if (decision.kind !== 'oversized') {
+    throw new Error('Expected oversized file-size decision');
+  }
+
+  return decision;
 }
