@@ -2,6 +2,12 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.9.2
+
+- Added viewer coverage for valid drag-and-drop CSV opening.
+- Added viewer coverage for standard and oversized large-file decisions.
+- Verified that oversized local files can go directly to Raw mode after user confirmation.
+
 ## v0.9.1
 
 - Added a no-remote-CDN-code verification script for built extension assets.
