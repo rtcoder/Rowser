@@ -2,6 +2,12 @@
 
 All notable changes to Rowser are listed here.
 
+## v1.2.4
+
+- Adds a Firefox download link to the GitHub Pages site pointing to the latest GitHub release.
+- Updates site copy to mention both Chrome and Firefox support.
+- Bumps Chrome and Firefox extension manifests to `1.2.4`.
+
 ## v1.2.3
 
 - Adds Firefox AMO reviewer notes for DuckDB/WASM, permissions, remote-code policy, and local data handling.

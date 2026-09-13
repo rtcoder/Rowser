@@ -146,6 +146,7 @@ h3 {
   flex-wrap: wrap;
   gap: 12px;
   margin-top: 34px;
+  max-width: 720px;
 }
 
 .button {
