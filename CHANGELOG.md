@@ -2,6 +2,12 @@
 
 All notable changes to Rowser are listed here.
 
+## v1.0.0
+
+- Declared Rowser v1 stable for Chromium-based browsers.
+- Confirms automatic CSV/TSV opening, manual URL/local file/drop flows, Table and Raw modes, DuckDB-backed search/sort/pagination, large-file decisions, local-only processing, packaging, and release automation.
+- Restricts automatic redirect rules to GET navigations and runs remote-code plus Chromium E2E checks in the release workflow before publishing artifacts.
+
 ## v0.9.5
 
 - Documented why automated packaged-extension tests use bundled Chromium.

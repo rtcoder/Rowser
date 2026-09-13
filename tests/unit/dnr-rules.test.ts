@@ -34,4 +34,10 @@ describe('buildDocumentRedirectRules', () => {
       )
     ).toBe(true);
   });
+
+  it('limits every redirect rule to GET navigations', () => {
+    const rules = buildDocumentRedirectRules('chrome-extension://abc/viewer.html');
+
+    expect(rules.every((rule) => rule.condition.requestMethods?.includes('get'))).toBe(true);
+  });
 });

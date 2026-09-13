@@ -21,6 +21,7 @@ export function buildDocumentRedirectRules(viewerUrl: string): DnrRule[] {
         regexFilter: '^https?://.*\\.csv([?#].*)?$',
         isUrlFilterCaseSensitive: false,
         resourceTypes: ['main_frame'],
+        requestMethods: ['get'],
         excludedResponseHeaders: [ATTACHMENT_HEADER]
       }
     },
@@ -32,6 +33,7 @@ export function buildDocumentRedirectRules(viewerUrl: string): DnrRule[] {
         regexFilter: '^https?://.*\\.tsv([?#].*)?$',
         isUrlFilterCaseSensitive: false,
         resourceTypes: ['main_frame'],
+        requestMethods: ['get'],
         excludedResponseHeaders: [ATTACHMENT_HEADER]
       }
     },
@@ -43,6 +45,7 @@ export function buildDocumentRedirectRules(viewerUrl: string): DnrRule[] {
         regexFilter: '^https?://.*',
         isUrlFilterCaseSensitive: false,
         resourceTypes: ['main_frame'],
+        requestMethods: ['get'],
         excludedResponseHeaders: [ATTACHMENT_HEADER],
         responseHeaders: [
           { header: 'content-type', values: ['text/csv*', 'application/csv*'] }
@@ -57,6 +60,7 @@ export function buildDocumentRedirectRules(viewerUrl: string): DnrRule[] {
         regexFilter: '^https?://.*',
         isUrlFilterCaseSensitive: false,
         resourceTypes: ['main_frame'],
+        requestMethods: ['get'],
         excludedResponseHeaders: [ATTACHMENT_HEADER],
         responseHeaders: [
           { header: 'content-type', values: ['text/tab-separated-values*', 'text/tsv*'] }
