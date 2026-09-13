@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v1.2.2
+
+- Makes the release workflow recover from GitHub API 500s that leave a partially-created draft release.
+- Bumps Chrome and Firefox extension manifests to `1.2.2`.
+
 ## v1.2.1
 
 - Adds Mozilla `web-ext` linting for the Firefox build output and runs it in the release workflow.

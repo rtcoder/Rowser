@@ -85,7 +85,35 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
+
           tag="${GITHUB_REF_NAME}"
-          gh release create "$tag" artifacts/*.zip \
-            --title "$tag" \
-            --notes-file release-notes.md
+
+          if ! gh release create "$tag" artifacts/*.zip --title "$tag" --notes-file release-notes.md; then
+            echo "gh release create failed; checking for a partially-created release"
+            gh release view "$tag" >/dev/null
+            gh release upload "$tag" artifacts/*.zip --clobber
+          fi
+
+          for attempt in 1 2 3; do
+            if gh release edit "$tag" --draft=false --latest; then
+              break
+            fi
+
+            if [ "$(gh release view "$tag" --json isDraft --jq '.isDraft')" = "false" ]; then
+              break
+            fi
+
+            echo "Release publish attempt $attempt failed; retrying"
+            sleep 5
+          done
+
+          gh release view "$tag" --json isDraft,assets --jq '
+            if .isDraft then
+              error("release is still a draft")
+            elif (.assets | length) == 0 then
+              error("release has no assets")
+            else
+              "release ready"
+            end
+          '
