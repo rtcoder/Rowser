@@ -2,9 +2,12 @@
 
 Rowser — Instant CSV & TSV Viewer.
 
-Rowser is a Chromium-first Manifest V3 extension that opens inline CSV and TSV
-documents in a searchable table viewer while keeping the original raw text
-available.
+Rowser is a browser extension that opens CSV and TSV documents in a searchable
+table viewer while keeping the original raw text available.
+
+The Chromium target can automatically redirect eligible top-level CSV and TSV
+responses into the viewer. The Firefox target currently supports manual URL
+opening, local files, drag-and-drop, Table mode, and Raw mode.
 
 ## Development
 
@@ -13,11 +16,14 @@ pnpm install
 pnpm exec playwright install chromium
 pnpm test
 pnpm test:e2e
-pnpm build
+pnpm build:chrome
+pnpm build:firefox
 pnpm run verify:no-remote-code
+pnpm run verify:no-remote-code:firefox
 ```
 
-Load `dist/chrome/` as an unpacked extension after building.
+Load `dist/chrome/` as an unpacked extension after building Chromium, or
+`dist/firefox/` through `about:debugging` after building Firefox.
 Automated extension tests use Playwright's bundled Chromium because official
 Google Chrome and Microsoft Edge no longer support the command-line flags used
 to side-load unpacked extensions. Verify branded Chrome manually through
@@ -33,16 +39,19 @@ feature milestones.
 
 - `docs/` is reserved for documentation and GitHub Pages.
 - `extension/chrome/` contains the Chromium Manifest V3 target.
-- `extension/firefox/` is reserved for future Firefox support.
+- `extension/firefox/` contains the Firefox Manifest V3 target.
 - `extension/shared/` contains browser-agnostic UI and core logic where practical.
 - `codex.md` stays in the repository root as the implementation plan.
 
 ## Permissions
 
-Rowser requests `declarativeNetRequest`, `storage`, and broad `http://*/*` /
-`https://*/*` host permissions so Chrome can redirect eligible top-level CSV
-and TSV document responses into the extension viewer. It uses `storage.session`
-only for short-lived navigation handoff metadata.
+The Chromium target requests `declarativeNetRequest`, `storage`, and broad
+`http://*/*` / `https://*/*` host permissions so Chrome can redirect eligible
+top-level CSV and TSV document responses into the extension viewer. It uses
+`storage.session` only for short-lived navigation handoff metadata.
+
+The Firefox target requests `storage` and host permissions for manual URL
+opening. Automatic navigation interception is not implemented there yet.
 
 ## Privacy
 

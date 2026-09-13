@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v1.1.1
+
+- Updates README documentation for the Firefox build target and clarifies that automatic CSV/TSV navigation interception is still Chromium-only.
+- Bumps Chrome and Firefox extension manifests to `1.1.1`.
+
 ## v1.1.0
 
 - Adds the initial Firefox build target with shared popup/viewer UI, Firefox MV3 manifest, package scripts, and release packaging support.
