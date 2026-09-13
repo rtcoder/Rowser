@@ -2,6 +2,12 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.9.1
+
+- Added a no-remote-CDN-code verification script for built extension assets.
+- Documented the remote-code verification command and README screenshot guidance.
+- Corrected README permissions text to match the `declarativeNetRequest` implementation.
+
 ## v0.9.0
 
 - Added streaming remote-source reads for responses without `Content-Length`.

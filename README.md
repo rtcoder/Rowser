@@ -14,6 +14,7 @@ pnpm exec playwright install chromium
 pnpm test
 pnpm test:e2e
 pnpm build
+pnpm run verify:no-remote-code
 ```
 
 Load `dist/chrome/` as an unpacked extension after building.
@@ -34,10 +35,10 @@ feature milestones.
 
 ## Permissions
 
-Rowser requests `webRequest` and broad `http://*/*` / `https://*/*` host
-permissions so the service worker can detect top-level CSV and TSV document
-responses. It uses `storage.session` only for short-lived navigation handoff
-metadata.
+Rowser requests `declarativeNetRequest`, `storage`, and broad `http://*/*` /
+`https://*/*` host permissions so Chrome can redirect eligible top-level CSV
+and TSV document responses into the extension viewer. It uses `storage.session`
+only for short-lived navigation handoff metadata.
 
 ## Privacy
 
@@ -53,6 +54,14 @@ Rowser targets normal usage up to roughly 512 MB. Files above 200 MB show a
 memory warning before table import, and files above 512 MB require an explicit
 decision before Rowser attempts table mode. Raw mode remains available for large
 files and reads sources in chunks instead of rendering one DOM node per row.
+
+## Screenshots
+
+Recommended Chrome Web Store screenshots:
+
+- Table view with search, sorting, pagination, and the source summary visible.
+- Raw view with line wrapping and chunk controls visible for a large file.
+- Large-file warning dialog showing `Open anyway`, `Show raw`, and `Cancel`.
 
 ## Chrome Web Store
 
