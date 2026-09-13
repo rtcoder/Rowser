@@ -1,7 +1,7 @@
 import type { FileSizeDecision } from '../state/file-size-policy';
 
 interface LargeFileDialogProps {
-  decision: Exclude<FileSizeDecision, { kind: 'none' }>;
+  decision: Exclude<FileSizeDecision, { kind: 'none' } | { kind: 'subtle' }>;
   sourceName: string;
   onOpenTable: () => void;
   onShowRaw: () => void;

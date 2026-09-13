@@ -23,7 +23,7 @@ type LoadState =
   | {
       status: 'deciding-large-file';
       source: RowserSource;
-      decision: Exclude<FileSizeDecision, { kind: 'none' }>;
+      decision: Exclude<FileSizeDecision, { kind: 'none' } | { kind: 'subtle' }>;
     }
   | { status: 'ready'; source: RowserSource }
   | { status: 'error'; title: string; detail: string };
@@ -56,7 +56,7 @@ export function App() {
   function acceptSource(source: RowserSource) {
     const decision = getFileSizeDecision(source.size);
 
-    if (decision.kind === 'none') {
+    if (decision.kind === 'none' || decision.kind === 'subtle') {
       setState({ status: 'ready', source });
       setPageRequest(DEFAULT_PAGE_REQUEST);
       setQueryRequest(DEFAULT_PAGE_REQUEST);
@@ -214,6 +214,7 @@ export function App() {
         {state.status === 'ready' ? (
           <p>
             {state.source.name} · {formatBytes(state.source.size)}
+            {getFileSizeDecision(state.source.size).kind === 'subtle' ? ' · Large file' : ''}
             {tableState.status === 'ready'
               ? ` · ${tableState.metadata.rowCount} rows x ${tableState.page.columns.length} columns`
               : ''}

@@ -1,7 +1,12 @@
-import { LARGE_FILE_WARNING_BYTES, RECOMMENDED_MAX_BYTES } from '../../shared/constants';
+import {
+  LARGE_FILE_WARNING_BYTES,
+  RECOMMENDED_MAX_BYTES,
+  SUBTLE_LARGE_FILE_BYTES
+} from '../../shared/constants';
 
 export type FileSizeDecision =
   | { kind: 'none' }
+  | { kind: 'subtle'; statusLabel: string }
   | {
       kind: 'large' | 'oversized';
       title: string;
@@ -10,8 +15,12 @@ export type FileSizeDecision =
     };
 
 export function getFileSizeDecision(size: number | null): FileSizeDecision {
-  if (size == null || size < LARGE_FILE_WARNING_BYTES) {
+  if (size == null || size < SUBTLE_LARGE_FILE_BYTES) {
     return { kind: 'none' };
+  }
+
+  if (size < LARGE_FILE_WARNING_BYTES) {
+    return { kind: 'subtle', statusLabel: 'Large file' };
   }
 
   if (size <= RECOMMENDED_MAX_BYTES) {

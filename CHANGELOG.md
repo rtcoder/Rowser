@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.8.5
+
+- Added the subtle `Large file` viewer status for files from 50 MB up to the warning threshold.
+- Added policy and viewer coverage for the 50-200 MB file-size band.
+
 ## v0.8.4
 
 - Added packaged-extension e2e coverage for pagination across a larger CSV file.
