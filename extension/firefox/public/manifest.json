@@ -3,17 +3,16 @@
   "name": "Rowser",
   "description": "Instant CSV & TSV Viewer",
   "version": "1.1.0",
-  "minimum_chrome_version": "128",
   "icons": {
     "16": "icons/icon-16.png",
     "32": "icons/icon-32.png",
     "48": "icons/icon-48.png",
     "128": "icons/icon-128.png"
   },
-  "permissions": ["storage", "declarativeNetRequest"],
+  "permissions": ["storage"],
   "host_permissions": ["http://*/*", "https://*/*"],
   "background": {
-    "service_worker": "service-worker.js",
+    "scripts": ["background.js"],
     "type": "module"
   },
   "action": {
@@ -34,5 +33,13 @@
       "resources": ["viewer.html"],
       "matches": ["http://*/*", "https://*/*"]
     }
-  ]
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "@rowser",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  }
 }

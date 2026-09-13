@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v1.1.0
+
+- Adds the initial Firefox build target with shared popup/viewer UI, Firefox MV3 manifest, package scripts, and release packaging support.
+- Firefox support starts with manual URL, local file, drop, Table, and Raw flows; automatic CSV/TSV navigation interception remains Chromium-only for now.
+
 ## v1.0.5
 
 - Adds the GitHub Pages landing page in `docs` with Chrome Web Store CTA and existing store graphics.

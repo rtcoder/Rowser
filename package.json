@@ -1,6 +1,6 @@
 {
   "name": "rowser",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@11.19.0",
@@ -9,8 +9,11 @@
     "dev:chrome": "vite --config extension/chrome/vite.config.ts --host 127.0.0.1",
     "build": "tsc --noEmit && vite build --config extension/chrome/vite.config.ts",
     "build:chrome": "tsc --noEmit && vite build --config extension/chrome/vite.config.ts",
+    "build:firefox": "tsc --noEmit && vite build --config extension/firefox/vite.config.ts",
     "package:chrome": "sh scripts/package-extension.sh chrome",
+    "package:firefox": "sh scripts/package-extension.sh firefox",
     "verify:no-remote-code": "sh scripts/verify-no-remote-code.sh chrome",
+    "verify:no-remote-code:firefox": "sh scripts/verify-no-remote-code.sh firefox",
     "test": "vitest run",
     "test:e2e": "playwright test"
   },
