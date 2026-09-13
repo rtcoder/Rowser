@@ -2,6 +2,10 @@
 
 All notable changes to Rowser are listed here.
 
+## v1.0.2
+
+- Runs release E2E checks under Xvfb on GitHub-hosted Linux runners.
+
 ## v1.0.1
 
 - Installs Playwright Chromium in the tag-push release workflow before running E2E checks.

@@ -42,7 +42,7 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Run Chromium E2E tests
-        run: pnpm test:e2e
+        run: xvfb-run -a pnpm test:e2e
 
       - name: Package Chrome extension
         run: sh scripts/package-extension.sh chrome "$GITHUB_REF_NAME"
