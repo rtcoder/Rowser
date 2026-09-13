@@ -2,6 +2,11 @@
 
 All notable changes to Rowser are listed here.
 
+## v0.8.4
+
+- Added packaged-extension e2e coverage for pagination across a larger CSV file.
+- Verified that next-page navigation updates the displayed row range and table rows.
+
 ## v0.8.3
 
 - Added explicit viewer error titles for empty files, unsupported local files, expired handoffs, and HTTP responses.

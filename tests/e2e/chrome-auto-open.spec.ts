@@ -144,6 +144,28 @@ test('imports mixed-type CSV columns without dropping text values', async () => 
   }
 });
 
+test('paginates larger CSV files in the packaged Chrome viewer', async () => {
+  const fixtureServer = await startFixtureServer();
+  const browser = await launchExtension();
+
+  try {
+    const page = await openManualUrl(browser.context, fixtureServer.url('/large-page.csv'));
+
+    await expect(page.getByRole('region', { name: 'CSV table' })).toBeVisible();
+    await expect(page.getByText('1-100 of 125')).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'row-001' })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Next' }).click();
+
+    await expect(page.getByText('101-125 of 125')).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'row-101' })).toBeVisible();
+    await expect(page.getByRole('cell', { name: 'row-001' })).toHaveCount(0);
+  } finally {
+    await browser.close();
+    await fixtureServer.close();
+  }
+});
+
 test('redirects a top-level TSV navigation to the packaged Chrome viewer', async () => {
   const fixtureServer = await startFixtureServer();
   const browser = await launchExtension();
@@ -282,6 +304,15 @@ async function startFixtureServer(): Promise<FixtureServer> {
       return;
     }
 
+    if (pathname === '/large-page.csv') {
+      response.writeHead(200, {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'text/csv'
+      });
+      response.end(largePageCsv());
+      return;
+    }
+
     if (pathname === '/attachment.csv') {
       response.writeHead(200, {
         'Content-Disposition': 'attachment; filename="attachment.csv"',
@@ -379,6 +410,15 @@ async function openManualUrl(context: BrowserContext, sourceUrl: string) {
   const page = await context.newPage();
   await page.goto(`${viewerUrl}?url=${encodeURIComponent(sourceUrl)}`);
   return page;
+}
+
+function largePageCsv(): string {
+  const rows = Array.from({ length: 125 }, (_, index) => {
+    const rowNumber = index + 1;
+    return `${rowNumber},row-${String(rowNumber).padStart(3, '0')}`;
+  });
+
+  return ['id,label', ...rows].join('\n');
 }
 
 function close(server: Server): Promise<void> {
